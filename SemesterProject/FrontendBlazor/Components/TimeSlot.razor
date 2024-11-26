@@ -1,0 +1,38 @@
+@code {
+    [Parameter] public string Apartment { get; set; }
+    [Parameter] public string StartTime { get; set; }
+    [Parameter] public string EndTime { get; set; }
+    [Parameter] public bool IsAvailable { get; set; }
+    [Parameter] public DateTime SelectedDate { get; set; }
+    [Parameter] public int TimeSlotId { get; set; }
+    [Parameter] public EventCallback<(string Apartment, string StartTime, string EndTime, int TimeSlotId)> OnBookSlot { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (IsAvailable)
+        {
+            await OnBookSlot.InvokeAsync((Apartment, StartTime, EndTime, TimeSlotId));
+        }
+        else
+        {
+            Console.WriteLine("Slot not available");
+        }
+    }
+}
+
+<div class="pt-4">
+    <div @onclick="HandleClick" 
+         class="pt-4 rounded-md shadow-md w-3/5 mx-auto @(IsAvailable ? "bg-green-500" : "bg-red-500") text-white transform transition-transform duration-200 hover:scale-105">
+        <div class="flex-grow text-center">
+            <h3 class="text-2xl font-semibold">@($"{StartTime} - {EndTime}")</h3>
+            <p class="text-sm">@SelectedDate.ToString("dddd, d/M/yyyy")</p>
+        </div>
+
+        @if (!IsAvailable)
+        {
+            <div class="flex justify-end">
+                <p class="ml-4 text-xl font-medium">@Apartment</p>
+            </div>
+        }
+    </div>
+</div>

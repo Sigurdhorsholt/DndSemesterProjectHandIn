@@ -1,0 +1,43 @@
+@inject AuthStateService AuthService
+@inject NavigationManager Navigation
+
+<div class="mt-8">
+    <h2 class="text-2xl mb-4">Log In</h2>
+    @if (error != null)
+    {
+    <p class="text-red-500">@error</p>
+    }
+    <form @onsubmit="HandleLogin" class="flex flex-col items-center">
+        <div class="mb-4">
+            <label class="block text-sm font-medium">Username</label>
+            <input @bind="username" type="text" class="px-4 py-2 rounded border text-black" />
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium">Password</label>
+            <input @bind="password" type="password" class="px-4 py-2 rounded border text-black" />
+        </div>
+        <button type="submit" class="px-6 py-3 bg-white text-teal-500 font-semibold rounded-lg shadow-md hover:bg-gray-100">
+            Log In
+        </button>
+    </form>
+</div>
+
+@code {
+private string username;
+private string password;
+private string? error;
+
+private async Task HandleLogin()
+{
+// Prevent form submission from refreshing the page
+var success = await AuthService.Login(username, password);
+if (success)
+{
+Navigation.NavigateTo("/UserDashboard");
+}
+else
+{
+error = "Invalid credentials. Please try again.";
+}
+}
+}

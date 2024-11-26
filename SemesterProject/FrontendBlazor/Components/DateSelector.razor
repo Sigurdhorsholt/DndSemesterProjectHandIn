@@ -1,0 +1,75 @@
+@code {
+    [Parameter] public DateTime SelectedDate { get; set; }
+    [Parameter] public EventCallback<DateTime> SelectedDateChanged { get; set; }
+
+    private DateTime currentDate = DateTime.Now;
+    private List<DateTime> weekDates = new();
+
+    protected override void OnInitialized()
+    {
+        weekDates = GetWeekDates(currentDate);
+    }
+
+    private List<DateTime> GetWeekDates(DateTime date)
+    {
+        List<DateTime> week = new();
+        DateTime current = date;
+        int firstDayOfWeek = current.Day - (int)current.DayOfWeek + 1;
+
+        for (int i = 0; i < 7; i++)
+        {
+            DateTime day = current.AddDays(i - (int)current.DayOfWeek + 1);
+            week.Add(day);
+        }
+
+        return week;
+    }
+
+    private void GoToPreviousWeek()
+    {
+        currentDate = currentDate.AddDays(-7);
+        weekDates = GetWeekDates(currentDate);
+    }
+
+    private void GoToNextWeek()
+    {
+        currentDate = currentDate.AddDays(7);
+        weekDates = GetWeekDates(currentDate);
+    }
+
+    private bool IsToday(DateTime date)
+    {
+        DateTime today = DateTime.Today;
+        return date.Date == today;
+    }
+
+    private async Task SetSelectedDate(DateTime date)
+    {
+        SelectedDate = date;
+        await SelectedDateChanged.InvokeAsync(date);
+    }
+}
+
+<div class="Dateselector">
+    <!-- Week Navigation -->
+    <div class="flex justify-between bg-gray-100 p-4">
+        <button @onclick="GoToPreviousWeek" class="bg-teal-500 text-white px-4 py-2 rounded">
+            Previous
+        </button>
+        <button @onclick="GoToNextWeek" class="bg-teal-500 text-white px-4 py-2 rounded">
+            Next
+        </button>
+    </div>
+
+    <!-- Date Selector -->
+    <div class="flex justify-around bg-gray-100 p-4">
+        @foreach (var date in weekDates)
+        {
+            <div @onclick="() => SetSelectedDate(date)"
+                 class="cursor-pointer text-center p-2 @(IsToday(date) ? "text-teal-500 font-bold" : "") @(SelectedDate.Date == date.Date ? "bg-teal-500 text-white rounded-full" : "")">
+                <div>@date.ToString("ddd")</div>
+                <div>@date.ToString("d/M")</div>
+            </div>
+        }
+    </div>
+</div>

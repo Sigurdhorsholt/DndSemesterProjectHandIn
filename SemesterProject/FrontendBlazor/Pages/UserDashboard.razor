@@ -1,0 +1,118 @@
+@page "/UserDashboard"
+@using System.Runtime.InteropServices.JavaScript
+@using FrontendBlazor.Model.DTOs
+@inject LaundryRoomService LaundryRoomService
+@inject BookingService BookingService
+@inject AuthStateService AuthState
+
+<h1 class="text-4xl font-bold">User Dashboard</h1>
+
+<!-- Week Navigation -->
+<Dateselector SelectedDate="@selectedDate" SelectedDateChanged="@OnDateSelected" />
+
+@if (LaundryRoomService.AccessibleRooms?.Count > 1)
+{
+    <label class="block mt-4">
+        <span class="text-sm font-medium">Select Laundry Room:</span>
+        <select @bind="selectedLaundryRoomId" class="px-4 py-2 rounded border mt-2">
+            @foreach (var room in LaundryRoomService.AccessibleRooms)
+            {
+                <option value="@room.LaundryRoomId">@room.RoomName</option>
+            }
+        </select>
+    </label>
+}
+
+@if (LaundryRoomService.AccessibleMachines?.Count > 1 && selectedLaundryRoomId.HasValue)
+{
+    <label class="block mt-4">
+        <span class="text-sm font-medium">Select Machine:</span>
+        <select @bind="selectedMachineId" class="px-4 py-2 rounded border mt-2">
+            @foreach (var machine in LaundryRoomService.AccessibleMachines.Where(m => m.LaundryRoomId == selectedLaundryRoomId.Value))
+            {
+                <option value="@machine.MachineId">@machine.MachineName</option>
+            }
+        </select>
+    </label>
+}
+
+<div class="mt-6">
+    @foreach (var slot in timeSlots)
+    {
+        <TimeSlot Apartment="Figure this one out later...."
+                  StartTime="@slot.StartTime.ToString()"
+                  EndTime="@slot.EndTime.ToString()"
+                  IsAvailable="true"
+                  SelectedDate="@selectedDate"
+                  TimeSlotId="@slot.TimeslotId"
+                  OnBookSlot="@OnBookSlot" />
+    }
+</div>
+
+@code {
+    private DateTime selectedDate = DateTime.Today;
+    private int? selectedLaundryRoomId;
+    private int? selectedMachineId;
+    private List<TimeSlotDto> timeSlots = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch accessible rooms and machines for the current user
+        await LaundryRoomService.FetchAccessibleRoomsAndMachinesAsync(AuthState.CurrentUser.Id);
+
+        // Fetch time slots and bookings if a laundry room is already selected
+        if (selectedLaundryRoomId.HasValue)
+        {
+            await FetchTimeSlotsAndBookings();
+        }
+    }
+
+    private async Task OnDateSelected(DateTime date)
+    {
+        selectedDate = date;
+        if (selectedLaundryRoomId.HasValue)
+        {
+            await FetchTimeSlotsAndBookings();
+        }
+    }
+
+    private async Task OnLaundryRoomChanged(int? newRoomId)
+    {
+        selectedLaundryRoomId = newRoomId;
+
+        // Re-fetch the available machines if a room is selected
+        if (selectedLaundryRoomId.HasValue)
+        {
+            await FetchTimeSlotsAndBookings();
+        }
+    }
+
+    private async Task FetchTimeSlotsAndBookings()
+    {
+        if (selectedLaundryRoomId.HasValue)
+        {
+            timeSlots = await LaundryRoomService.GetTimeSlotsForLaundryRoom(selectedLaundryRoomId.Value);
+        }
+    }
+
+    private async Task OnBookSlot((string Apartment, string StartTime, string EndTime, int TimeSlotId) slotDetails)
+    {
+        try
+        {
+                
+            await BookingService.CreateBooking(
+                AuthState.CurrentUser.Id,
+                selectedMachineId.Value,
+                "Today - worng fix later",  
+                slotDetails.TimeSlotId,
+                selectedLaundryRoomId.Value);
+
+            // Re-fetch the time slots after booking to update availability
+            await FetchTimeSlotsAndBookings();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Booking failed: {ex.Message}");
+        }
+    }
+}
