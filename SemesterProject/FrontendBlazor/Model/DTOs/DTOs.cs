@@ -9,11 +9,7 @@ public class LaundryRoomDto
 {
     public int LaundryRoomId { get; set; }
     public string RoomName { get; set; }
-    public int ComplexId { get; set; }
-    public string ComplexName { get; set; }
-    public List<LaundryMachineDto> MachineDtos { get; set; } = new List<LaundryMachineDto>(); // List of available time slots
-
-    
+    public List<LaundryMachineDto> MachineDtos { get; set; } = new();
 }
 
 public class BookingDto
@@ -27,6 +23,7 @@ public class BookingDto
     public string StartTime { get; set; }
     public string EndTime { get; set; }
     public int LaundryRoomId { get; set; }
+    public int TimeSlotId { get; set; }
 }
     
 public class BookingRequestDto
@@ -47,7 +44,25 @@ public class UserDto
     public string UserType { get; set; } // SystemAdmin, ComplexAdmin, DailyUser
     public string Apartment { get; set; }
     public bool IsAdmin { get; set; }
+    public List<LivesInDto> LivesIn { get; set; } = new List<LivesInDto>();
+
+    
 }
+
+public class LivesInDto
+{
+    public string ComplexName { get; set; }
+    public string Street { get; set; }
+    public string City { get; set; }
+    public string ZipCode { get; set; }
+}
+
+
+
+
+
+
+
 public class ApartmentComplexDto
 {
     public int Id { get; set; }
@@ -65,15 +80,22 @@ public class TimeSlotDto
     public int ComplexId { get; set; }
     public string ComplexName { get; set; }
 }
+public class TimeSlotsResponseDto
+{
+    public List<TimeSlotDto> Timeslots { get; set; }
+}
+
+
 public class LaundryMachineDto
 {
     public int MachineId { get; set; }
     public string MachineName { get; set; }
-    public string MachineType { get; set; } // Washer or Dryer
-    public string Status { get; set; } // Available or InUse
+    public string MachineType { get; set; }
+    public string Status { get; set; }
     public int LaundryRoomId { get; set; }
     public string LaundryRoomName { get; set; }
 }
+
 
 public class ComplexSettingsDto
 {
@@ -106,5 +128,10 @@ public class UserLoginDto
 
 public class AccessibleLaundryRoomsDto
 {
-    public List<LaundryRoomDto> Rooms { get; set; } = new List<LaundryRoomDto>();
+    public List<LaundryRoomDto> Rooms { get; set; } = new();
+}
+
+public class UsersResponseDto
+{
+    public List<UserDto> Users { get; set; } = new();
 }

@@ -1,0 +1,188 @@
+@page "/AdminDashboard"
+
+@using FrontendBlazor.Model.DTOs
+@inject LaundryRoomService LaundryRoomService
+@inject AuthStateService AuthState
+
+<div class="flex h-screen">
+    <!-- Left Panel - Room List -->
+    <div class="w-1/4 bg-gray-100 p-4">
+        <h2 class="text-xl font-bold mb-4">Laundry Rooms</h2>
+        <ul>
+            @foreach (var room in LaundryRooms)
+            {
+            <li @onclick="() => SelectRoom(room)"
+                class="p-2 cursor-pointer @(SelectedRoom?.LaundryRoomId == room.LaundryRoomId ? "bg-teal-500 text-white" : "")">
+                <div>@room.RoomName</div>
+                <div>Id: @room.LaundryRoomId</div>
+            </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Middle Panel - Toggle Settings or User Management -->
+    <div class="w-3/4 p-4">
+        @if (SelectedRoom != null)
+        {
+        <div class="flex space-x-4 mb-4">
+            <button @onclick="@(() => ToggleMode("Settings"))"
+                    class="px-4 py-2 font-medium text-white bg-blue-500 rounded hover:bg-blue-700">
+                View Settings
+            </button>
+            <button @onclick="@(() => ToggleMode("Users"))"
+                    class="px-4 py-2 font-medium text-white bg-green-500 rounded hover:bg-green-700">
+                Manage Users
+            </button>
+        </div>
+
+        @if (mode == "Settings")
+        {
+        <h2 class="text-2xl font-bold mb-4">Settings for @SelectedRoom.RoomName</h2>
+        <TimeSlotSettings TimeSlots="CurrentSettings.TimeSlots" OnTimeSlotsChanged="@HandleTimeSlotsChanged" />
+        <MachineSettings LaundryMachines="CurrentSettings.LaundryMachines" />
+        <div class="mt-4">
+            <label>Max Bookings Per User: </label>
+            <input type="number" @bind="CurrentSettings.MaxBookingsPerUser" class="p-2 border rounded w-20" />
+        </div>
+        <div class="mt-4">
+            <label>Allow Showing User Info: </label>
+            <input type="checkbox" @bind="CurrentSettings.AllowShowUserInfo" />
+        </div>
+        <button @onclick="SaveSettings"
+                class="mt-4 px-5 py-2 font-medium text-black bg-blue-500 border border-blue-600 rounded hover:bg-blue-700">
+            Save All Changes
+        </button>
+        }
+        else if (mode == "Users")
+        {
+        <UserManagement LaundryRoomId="@SelectedRoom.LaundryRoomId"
+                        OnClose="@(() => mode = "Settings")" />
+        
+        }
+        }
+        else
+        {
+        <p>Select a laundry room to view its details.</p>
+        }
+    </div>
+</div>
+
+@code {
+    private List<LaundryRoomDto> LaundryRooms = new();
+    private LaundryRoomDto? SelectedRoom;
+    private List<ComplexSettingsDto> SettingsLists = new();
+    private ComplexSettingsDto CurrentSettings = new ComplexSettingsDto();
+    private List<TimeSlotDto> AddedTimeSlots = new();
+    private List<TimeSlotDto> RemovedTimeSlots = new();
+    private List<TimeSlotDto> UpdatedTimeSlots = new();
+    private string mode = "Settings"; // Tracks the current view (Settings or Users)
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState.CurrentUser?.Id != null)
+        {
+            LaundryRooms = LaundryRoomService.AccessibleRooms;
+
+            foreach (var room in LaundryRooms)
+            {
+                var settings = await LaundryRoomService.GetSettingsForLaundryRoom(room.LaundryRoomId);
+                SettingsLists.Add(settings);
+            }
+        }
+    }
+
+    private void ToggleMode(string selectedMode)
+    {
+        mode = selectedMode;
+    }
+    private async Task SelectRoom(LaundryRoomDto room)
+    {
+        SelectedRoom = room;
+        CurrentSettings = await LaundryRoomService.GetSettingsForLaundryRoom(room.LaundryRoomId);
+        StateHasChanged();
+    }
+
+    private void HandleTimeSlotsChanged(List<TimeSlotDto> updatedTimeSlots)
+    {
+        var original = CurrentSettings.TimeSlots;
+
+        foreach (var slot in updatedTimeSlots)
+        {
+            if (slot.TimeslotId == 0) // New slot
+            {
+                if (!AddedTimeSlots.Contains(slot))
+                {
+                    AddedTimeSlots.Add(slot);
+                }
+            }
+            else if (!original.Contains(slot)) // Updated slot
+            {
+                if (!UpdatedTimeSlots.Contains(slot))
+                {
+                    UpdatedTimeSlots.Add(slot);
+                }
+            }
+        }
+
+        foreach (var slot in original.Except(updatedTimeSlots)) // Removed slots
+        {
+            if (!RemovedTimeSlots.Contains(slot))
+            {
+                RemovedTimeSlots.Add(slot);
+            }
+        }
+
+        CurrentSettings.TimeSlots = updatedTimeSlots;
+    }
+
+    private async Task SaveSettings()
+    {
+        if (SelectedRoom != null && CurrentSettings != null)
+        {
+            // Sanitize TimeSlots: Remove duplicates
+            CurrentSettings.TimeSlots = CurrentSettings.TimeSlots
+                .GroupBy(ts => new { ts.StartTime, ts.EndTime, ts.ComplexId })
+                .Select(g => g.First())
+                .ToList();
+
+            // Handle null ComplexName
+            foreach (var slot in CurrentSettings.TimeSlots)
+            {
+                if (string.IsNullOrEmpty(slot.ComplexName))
+                {
+                    slot.ComplexName = "Default Complex Name"; // Replace with actual default if needed
+                }
+            }
+            
+            // Validate LaundryMachines
+            foreach (var machine in CurrentSettings.LaundryMachines)
+            {
+                if (machine.MachineId == 0) machine.MachineId = -1; // Temporary ID for new machines
+                if (string.IsNullOrEmpty(machine.Status)) machine.Status = "Available";
+                if (string.IsNullOrEmpty(machine.LaundryRoomName)) machine.LaundryRoomName = SelectedRoom.RoomName;
+                if (machine.LaundryRoomId == 0) machine.LaundryRoomId = SelectedRoom.LaundryRoomId;
+            }
+            
+
+            // Send settings to backend
+            var success = await LaundryRoomService.UpdateSettingsForLaundryRoom(SelectedRoom.LaundryRoomId, CurrentSettings);
+
+            if (success)
+            {
+                Console.WriteLine("Settings saved successfully!");
+            }
+            else
+            {
+                Console.WriteLine("Failed to save settings.");
+            }
+
+            // Clear tracking lists
+            AddedTimeSlots.Clear();
+            RemovedTimeSlots.Clear();
+            UpdatedTimeSlots.Clear();
+        }
+    }
+
+
+}

@@ -59,7 +59,6 @@ public class AuthController : ControllerBase
     {
         try
         {
-            Console.WriteLine("Login route tested " + model.UserName + " " + model.Password);
 
             // Check if user exists in the database
             var user = GetUserWithComplexInfo(model.UserName);
@@ -78,7 +77,10 @@ public class AuthController : ControllerBase
             var token = GenerateJwtToken(user);
 
             Console.WriteLine("Login successful for user ID: " + user.Id);
+            Console.WriteLine("Token to be returnedfrom AuthController.Login(): "+ token);
+
             return Ok(new { token });
+            //return Ok(token);
         }
         catch (Exception ex)
         {
@@ -87,6 +89,8 @@ public class AuthController : ControllerBase
         }
     }
 
+    
+    
     private User GetUserWithComplexInfo(string userName)
     {
         return _context.Users
@@ -100,25 +104,111 @@ public class AuthController : ControllerBase
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes("ThisIsASecretKeyWithAtLeast32Characters");
 
+        // Create a claims list and add default claims
         var claims = new List<Claim>
         {
             new Claim("UserId", user.Id.ToString()),
-            new Claim("Username", user.UserName),
-            new Claim("Email", user.Email),
-            new Claim("FullName", user.FullName ?? ""),
-            new Claim("Apartment", user.Apartment ?? ""),
+            new Claim("Username", user.UserName ?? ""),
+            new Claim("Email", user.Email ?? ""),
+            new Claim("FullName", (user.FullName ?? "").Replace("\n", "").Replace("\r", "")),
+            new Claim("Apartment", (user.Apartment ?? "").Replace("\n", "").Replace("\r", "")),
             new Claim("IsAdmin", user.IsAdmin ? "true" : "false")
         };
 
-        // If the user has multiple complexes, add claims for each one
+        // Add LivesIn-related claims
         foreach (var livesIn in user.LivesIn)
         {
             if (livesIn.ApartmentComplex != null)
             {
-                claims.Add(new Claim("ComplexName", livesIn.ApartmentComplex.ComplexName ?? ""));
-                claims.Add(new Claim("Street", livesIn.ApartmentComplex.Street ?? ""));
-                claims.Add(new Claim("City", livesIn.ApartmentComplex.City ?? ""));
-                claims.Add(new Claim("ZipCode", livesIn.ApartmentComplex.Zipcode.ToString() ?? ""));
+                claims.Add(new Claim("ComplexName", (livesIn.ApartmentComplex.ComplexName ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("Street", (livesIn.ApartmentComplex.Street ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("City", (livesIn.ApartmentComplex.City ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("ZipCode", livesIn.ApartmentComplex.Zipcode.ToString()));
+            }
+        }
+
+        // Create the token descriptor
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddDays(1),
+            Issuer = _configuration["Issuer"],
+            Audience = _configuration["Audience"],
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        // Generate the token
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+
+    
+    /*
+    
+    
+    private string GenerateJwtToken(User user)
+    {
+ 
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes("ThisIsASecretKeyWithAtLeast32Characters");
+        var tokenDescriptor = new SecurityTokenDescriptor()
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim("UserId", user.Id.ToString()),
+                new Claim("Username", user.UserName ?? ""),
+                new Claim("Email", user.Email ?? ""),
+                new Claim("FullName", (user.FullName ?? "").Replace("\n", "").Replace("\r", "")),
+                new Claim("Apartment", (user.Apartment ?? "").Replace("\n", "").Replace("\r", "")),
+                new Claim("IsAdmin", user.IsAdmin ? "true" : "false")
+                
+                
+                
+            }),
+
+            Expires = DateTime.UtcNow.AddDays(1),
+            Issuer = _configuration["Issuer"],
+            Audience = _configuration["Audience"],
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+        
+        
+        foreach (var livesIn in user.LivesIn)
+        {
+            if (livesIn.ApartmentComplex != null)
+            {
+                claims.Add(new Claim("ComplexName", (livesIn.ApartmentComplex.ComplexName ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("Street", (livesIn.ApartmentComplex.Street ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("City", (livesIn.ApartmentComplex.City ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("ZipCode", livesIn.ApartmentComplex.Zipcode.ToString()));
+            }
+        }
+        
+        
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+
+        /*
+        var claims = new List<Claim>
+        {
+            new Claim("UserId", user.Id.ToString()),
+            new Claim("Username", user.UserName ?? ""),
+            new Claim("Email", user.Email ?? ""),
+            new Claim("FullName", (user.FullName ?? "").Replace("\n", "").Replace("\r", "")),
+            new Claim("Apartment", (user.Apartment ?? "").Replace("\n", "").Replace("\r", "")),
+            new Claim("IsAdmin", user.IsAdmin ? "true" : "false")
+        };
+
+        foreach (var livesIn in user.LivesIn)
+        {
+            if (livesIn.ApartmentComplex != null)
+            {
+                claims.Add(new Claim("ComplexName", (livesIn.ApartmentComplex.ComplexName ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("Street", (livesIn.ApartmentComplex.Street ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("City", (livesIn.ApartmentComplex.City ?? "").Replace("\n", "").Replace("\r", "")));
+                claims.Add(new Claim("ZipCode", livesIn.ApartmentComplex.Zipcode.ToString()));
             }
         }
 
@@ -133,9 +223,15 @@ public class AuthController : ControllerBase
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
-    }
 
+        Console.WriteLine("Token returned: ", token);
+
+
+        return tokenHandler.WriteToken(token);
+
+       
+    }
+ */
 
     public class RegisterModel
     {

@@ -1,0 +1,25 @@
+@using FrontendBlazor.Model.DTOs
+@inject NavigationManager Navigation
+
+<div class="p-4">
+    <TimeSlotSettings TimeSlots="CurrentSettings.TimeSlots" />
+    <MachineSettings LaundryMachines="CurrentSettings.LaundryMachines" />
+    <UserSettings 
+        MaxBookingsPerUser="CurrentSettings.MaxBookingsPerUser"
+        AllowShowUserInfo="CurrentSettings.AllowShowUserInfo" />
+
+    <button @onclick="Save"
+            class="m-4 px-5 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-green-600 rounded-lg hover:bg-green-500 focus:outline-none">
+        Save Settings
+    </button>
+</div>
+
+@code {
+    [Parameter] public ComplexSettingsDto CurrentSettings { get; set; }
+    [Parameter] public EventCallback<ComplexSettingsDto> OnSave { get; set; }
+
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(CurrentSettings);
+    }
+}

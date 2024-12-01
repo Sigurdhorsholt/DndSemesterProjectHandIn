@@ -71,81 +71,121 @@ public class LaundryRoomController : ControllerBase
     {
         try
         {
+            // Fetch timeslots and join them with laundry rooms
             var timeslots = _context.Timeslots
                 .Join(_context.LaundryRooms, t => t.ComplexId, lr => lr.ComplexId,
                     (t, lr) => new { Timeslot = t, LaundryRoom = lr })
                 .Where(joinResult => joinResult.LaundryRoom.LaundryRoomId == id)
-                .Select(joinResult => new TimeslotDto
+                .Select(joinResult => new
                 {
-                    TimeslotId = joinResult.Timeslot.TimeslotId,
-                    StartTime = joinResult.Timeslot.StartTime,
-                    EndTime = joinResult.Timeslot.EndTime
+                    timeslotId = joinResult.Timeslot.TimeslotId,
+                    startTime = joinResult.Timeslot.StartTime,
+                    endTime = joinResult.Timeslot.EndTime
                 })
                 .ToList();
-            
-            //returned from DB un sorted. lets sort them herre: 
-            timeslots = timeslots.OrderBy(ts => ts.StartTime).ToList();
 
-
-            if (timeslots.Count == 0)
+            if (!timeslots.Any())
             {
                 return NotFound(new { message = "No timeslots found for this laundry room." });
             }
 
-            return Ok(timeslots);
+            // Shape the response to avoid $id and $values
+            var formattedResponse = timeslots.Select(ts => new
+            {
+                timeslotId = ts.timeslotId,
+                startTime = ts.startTime,
+                endTime = ts.endTime
+            }).ToList();
+
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles // Avoid $id and $values
+            };
+
+            return new JsonResult(new { timeslots = formattedResponse }, options);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            return StatusCode(500, e.Message);
-        }
-    }
-
-    // 3. Get Accessible Laundry Rooms and Machines for a admin
-    // 3. Get Accessible Laundry Rooms and Machines for an admin
-    [HttpGet("laundry-room/accessible/{userId}")]
-    public IActionResult GetAccessibleLaundryRoomsAndMachines(int userId)
-    {
-        try
-        {
-            // Step 1: Get accessible complex IDs for the user (either lived-in or managed)
-            var accessibleComplexIds = _context.LivesIn
-                .Where(li => li.UserId == userId)
-                .Select(li => li.ComplexId)
-                .Concat(
-                    _context.AdminManages
-                        .Where(am => am.UserId == userId)
-                        .Select(am => am.ComplexId)
-                )
-                .Distinct() // Use Distinct to remove duplicates
-                .ToList();
-
-            // Step 2: Get laundry rooms and related machines for the accessible complexes
-            var accessibleRooms = _context.LaundryRooms
-                .Where(lr => accessibleComplexIds.Contains(lr.ComplexId))  // Corrected from ApartmentComplexId to ComplexId
-                .Include(lr => lr.LaundryMachines)
-                .ToList();
-
-            // Step 3: Map to a list of anonymous objects (or DTOs if you prefer)
-            var roomsAndMachines = accessibleRooms.Select(lr => new
-            {
-                RoomId = lr.LaundryRoomId,
-                RoomName = lr.RoomName,
-                Machines = lr.LaundryMachines.Select(m => new
-                {
-                    MachineId = m.MachineId,
-                    MachineName = m.MachineName
-                }).ToList()
-            }).ToList();
-
-            return Ok(new { rooms = roomsAndMachines });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error fetching accessible rooms and machines: " + ex.Message);
+            // Log the error and return a server error response
+            Console.WriteLine($"Error fetching timeslots for laundry room {id}: {e.Message}");
             return StatusCode(500, "Internal server error");
         }
     }
+
+
+
+
+
+    // 3. Get Accessible Laundry Rooms and Machines for an admin
+   [HttpGet("laundry-room/accessible/{userId}")]
+public IActionResult GetAccessibleLaundryRoomsAndMachines(int userId)
+{
+    try
+    {
+        // Step 1: Get accessible complex IDs for the user
+        var accessibleComplexIds = _context.LivesIn
+            .Where(li => li.UserId == userId)
+            .Select(li => li.ComplexId)
+            .Concat(
+                _context.AdminManages
+                    .Where(am => am.UserId == userId)
+                    .Select(am => am.ComplexId)
+            )
+            .Distinct()
+            .ToList();
+
+        if (!accessibleComplexIds.Any())
+        {
+            Console.WriteLine("No accessible complexes found for the user.");
+            return NotFound(new { message = "No accessible complexes found for the user." });
+        }
+
+        // Step 2: Get laundry rooms and related machines for the accessible complexes
+        var accessibleRooms = _context.LaundryRooms
+            .Where(lr => accessibleComplexIds.Contains(lr.ComplexId))
+            .Include(lr => lr.LaundryMachines)
+            .ToList();
+
+        if (!accessibleRooms.Any())
+        {
+            Console.WriteLine("No accessible laundry rooms found for the complexes.");
+            return NotFound(new { message = "No accessible laundry rooms found for the complexes." });
+        }
+
+        // Step 3: Shape the response to avoid $values
+        var formattedResponse = accessibleRooms.Select(lr => new
+        {
+            laundryRoomId = lr.LaundryRoomId,
+            roomName = lr.RoomName,
+            machineDtos = lr.LaundryMachines
+                .Select(m => new
+                {
+                    machineId = m.MachineId,
+                    machineName = m.MachineName,
+                    machineType = m.MachineType,
+                    status = m.Status,
+                    laundryRoomId = m.LaundryRoomId
+                })
+                .ToList()
+        })
+        .ToList();
+
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles // Avoid $id and $values
+        };
+
+        return new JsonResult(new { rooms = formattedResponse }, options);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error fetching accessible rooms and machines: " + ex.Message);
+        return StatusCode(500, "Internal server error");
+    }
+}
+
 
 
     // DTO for LaundryRoom

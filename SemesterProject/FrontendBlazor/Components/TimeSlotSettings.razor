@@ -1,0 +1,115 @@
+@using FrontendBlazor.Model.DTOs
+
+<div class="mt-8 border-t-2 border-black-900">
+    <h2 class="font-bold text-xl">Time Slot Settings</h2>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+    <p class="text-red-500 mt-2">@ErrorMessage</p>
+    }
+
+    <ul class="mt-4">
+        @foreach (var slot in TimeSlots.OrderBy(slot => slot.StartTime))
+        {
+        <li class="flex justify-between items-center p-2 border-b hover:bg-gray-200 transition">
+            <span>@slot.StartTime - @slot.EndTime</span>
+            <button @onclick="() => RemoveTimeSlot(slot)" class="text-red-500 hover:text-red-700">
+                Delete
+            </button>
+        </li>
+        }
+    </ul>
+
+    <div class="mt-4">
+        <h2 class="font-bold text-xl">Add Time Slot</h2>
+        <div class="flex gap-4 items-center mt-2">
+            <div>
+                <label for="startTime" class="block text-sm font-medium">Start Time</label>
+                <input id="startTime" type="time" @bind="StartTimeInput" class="border p-2 rounded" />
+            </div>
+            <div>
+                <label for="endTime" class="block text-sm font-medium">End Time</label>
+                <input id="endTime" type="time" @bind="EndTimeInput" class="border p-2 rounded" />
+            </div>
+            <button @onclick="AddTimeSlot"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Add
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+        <p class="text-red-500 mt-2">@ErrorMessage</p>
+        }
+    </div>
+</div>
+
+
+    @code {
+        [Parameter] public List<TimeSlotDto> TimeSlots { get; set; } = new();
+    [Parameter] public EventCallback<List<TimeSlotDto>> OnTimeSlotsChanged { get; set; }
+
+    private TimeSpan startTimeInternal;
+    private TimeSpan endTimeInternal;
+
+// Wrapper properties for UI binding
+    private TimeOnly? StartTimeInput
+    {
+        get => TimeOnly.FromTimeSpan(startTimeInternal);
+        set => startTimeInternal = value.HasValue ? value.Value.ToTimeSpan() : TimeSpan.Zero;
+    }
+
+    private TimeOnly? EndTimeInput
+    {
+        get => TimeOnly.FromTimeSpan(endTimeInternal);
+        set => endTimeInternal = value.HasValue ? value.Value.ToTimeSpan() : TimeSpan.Zero;
+    }
+
+    
+    
+    private string ErrorMessage;
+
+    private void AddTimeSlot()
+    {
+        ErrorMessage = string.Empty;
+
+        // Validate times
+        if (startTimeInternal >= endTimeInternal)
+        {
+            ErrorMessage = "Start time must be earlier than end time.";
+            return;
+        }
+
+        if (TimeSlots.Any(slot => TimesOverlap(slot.StartTime, slot.EndTime, startTimeInternal, endTimeInternal)))
+        {
+            ErrorMessage = "The new time slot overlaps with an existing one.";
+            return;
+        }
+
+        var newSlot = new TimeSlotDto
+        {
+            StartTime = startTimeInternal,
+            EndTime = endTimeInternal,
+        };
+
+        TimeSlots.Add(newSlot);
+        OnTimeSlotsChanged.InvokeAsync(TimeSlots);
+
+        // Reset inputs
+        StartTimeInput = null;
+        EndTimeInput = null;
+        ErrorMessage = string.Empty;
+    }
+
+
+    private void RemoveTimeSlot(TimeSlotDto slot)
+    {
+        TimeSlots.Remove(slot);
+        OnTimeSlotsChanged.InvokeAsync(TimeSlots);
+    }
+
+    private bool TimesOverlap(TimeSpan existingStart, TimeSpan existingEnd, TimeSpan newStart, TimeSpan newEnd)
+    {
+        return !(newEnd <= existingStart || newStart >= existingEnd);
+    }
+    }

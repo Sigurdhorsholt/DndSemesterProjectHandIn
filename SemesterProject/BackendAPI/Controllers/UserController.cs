@@ -19,18 +19,39 @@ namespace BackendAPI.Controllers
             _context = context;
         }
 
-        // Get all users
-        [HttpGet]
-        public IActionResult GetUsers()
+// Get all users for a specific laundry room (based on ComplexId)
+        [HttpGet("laundryroom/{laundryRoomId}/users")]
+        public IActionResult GetUsersByLaundryRoom(int laundryRoomId)
         {
             try
             {
-                var users = _context.Users.ToList();
-                return Ok(users); // Return data in JSON format
+                // Find the complex ID associated with the given laundry room
+                var laundryRoom = _context.LaundryRooms.FirstOrDefault(lr => lr.LaundryRoomId == laundryRoomId);
+                if (laundryRoom == null)
+                {
+                    return NotFound(new { message = "Laundry room not found." });
+                }
+
+                // Fetch users associated with the complex
+                var users = _context.LivesIn
+                    .Where(li => li.ComplexId == laundryRoom.ComplexId)
+                    .Select(li => li.User)
+                    .ToList();
+
+                
+                
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles // Avoid $id and $values
+                };
+
+                return new JsonResult(new { users = users }, options);
+           
+           //     return Ok(users); // Return the list of users
             }
             catch (Exception ex)
             {
-                // Handle the error (you can return an appropriate HTTP error code and message)
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }

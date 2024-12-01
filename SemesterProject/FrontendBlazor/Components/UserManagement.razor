@@ -1,0 +1,168 @@
+@using FrontendBlazor.Model.DTOs
+@inject LaundryRoomService LaundryRoomService
+<div class="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-6 rounded shadow-lg w-3/4 max-w-4xl">
+        <h2 class="text-2xl font-bold mb-6 text-center">Manage Users</h2>
+
+        <!-- Close Button -->
+        <div class="mt-6 text-center">
+            <button @onclick="OnClose" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+                Close
+            </button>
+        </div>
+
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-2 gap-8">
+            <!-- User List Section -->
+            <div class="bg-gray-100 p-4 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">User List</h3>
+                <div class="h-80 overflow-y-auto">
+                    <ul>
+                        @foreach (var user in Users)
+                        {
+                        <li class="flex justify-between items-center py-2 border-b">
+                            <span>@user.FullName (@user.Apartment)</span>
+                            <button @onclick="() => DeleteUser(user.Id)"
+                                    class="text-red-500 hover:underline">Remove</button>
+                        </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Add User Form Section -->
+            <div class="bg-gray-100 p-4 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Add New User</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input id="fullName" type="text" @bind="newUserName"
+                               class="mt-1 block w-full p-2 border rounded focus:ring focus:ring-blue-300"
+                               placeholder="Enter Full Name" />
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input id="email" type="email" @bind="newUserEmail"
+                               class="mt-1 block w-full p-2 border rounded focus:ring focus:ring-blue-300"
+                               placeholder="Enter Email" />
+                    </div>
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <input id="username" type="text" @bind="newUserUserName"
+                               class="mt-1 block w-full p-2 border rounded focus:ring focus:ring-blue-300"
+                               placeholder="Enter Username" />
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input id="password" type="password" @bind="newUserPassword"
+                               class="mt-1 block w-full p-2 border rounded focus:ring focus:ring-blue-300"
+                               placeholder="Enter Password" />
+                    </div>
+                    <div>
+                        <label for="apartment" class="block text-sm font-medium text-gray-700">Apartment</label>
+                        <input id="apartment" type="text" @bind="newUserApartment"
+                               class="mt-1 block w-full p-2 border rounded focus:ring focus:ring-blue-300"
+                               placeholder="Enter Apartment" />
+                    </div>
+                    <div>
+                        <label for="isAdmin" class="block text-sm font-medium text-gray-700">Is Admin?</label>
+                        <select id="isAdmin" @bind="newUserIsAdmin"
+                                class="mt-1 block w-full p-2 border rounded focus:ring focus:ring-blue-300">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button @onclick="AddUser"
+                                class="w-full bg-blue-500 text-black px-4 py-2 rounded hover:bg-blue-600">
+                            Add User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
+</div>
+
+@code {
+    [Parameter] public int LaundryRoomId { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private List<UserDto> Users = new();
+    private string newUserName;
+    private string newUserEmail;
+    private string newUserUserName;
+    private string newUserPassword;
+    private string newUserApartment;
+    private bool     newUserIsAdmin;
+    private string UserType;
+
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await FetchUsers();
+    }
+
+    private async Task FetchUsers()
+    {
+        Users = await LaundryRoomService.GetUsersForLaundryRoom(LaundryRoomId);
+    }
+
+    private async Task AddUser()
+    {
+        if (string.IsNullOrEmpty(newUserName) || string.IsNullOrEmpty(newUserEmail))
+        {
+            Console.WriteLine("Invalid user data.");
+            return;
+        }
+
+        // Ensure default values
+        if (string.IsNullOrEmpty(newUserUserName))
+            newUserUserName = newUserEmail; // Default username to email
+        if (string.IsNullOrEmpty(newUserPassword))
+            newUserPassword = "Temporary123!"; // Default password
+
+        var newUser = new UserRegistrationDto
+        {
+            FullName = newUserName,
+            Email = newUserEmail,
+            ComplexId = LaundryRoomId, // Assuming LaundryRoomId is linked to ComplexId
+            Apartment = string.IsNullOrEmpty(newUserApartment) ? "N/A" : newUserApartment, // Default apartment
+            UserName = newUserUserName,
+            Password = newUserPassword,
+            UserType = newUserIsAdmin ? "SystemAdmin" : "DailyUser", // Set based on admin selection
+            IsAdmin = newUserIsAdmin
+        };
+
+        await LaundryRoomService.RegisterUser(newUser);
+        Users.Add(new UserDto { FullName = newUser.FullName, Email = newUser.Email });
+
+        // Reset form fields
+        newUserName = string.Empty;
+        newUserEmail = string.Empty;
+        newUserUserName = string.Empty;
+        newUserPassword = string.Empty;
+        newUserApartment = string.Empty;
+        newUserIsAdmin = false;
+    }
+
+    private void SetUserTypeBasedOnAdmin(ChangeEventArgs e)
+    {
+        // Update the UserType based on the IsAdmin selection
+        if (bool.TryParse(e.Value?.ToString(), out var isAdmin))
+        {
+            UserType = isAdmin ? "SystemAdmin" : "DailyUser";
+        }
+    }
+
+
+    private async Task DeleteUser(int userId)
+    {
+        await LaundryRoomService.DeleteUser(userId);
+        Users.RemoveAll(u => u.Id == userId);
+    }
+}

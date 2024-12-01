@@ -7,6 +7,7 @@ using FrontendBlazor.Model.DTOs;
 public class BookingService
 {
     private readonly HttpClient _httpClient;
+    
 
     // Inject the HttpClient via constructor
     public BookingService(HttpClient httpClient)
@@ -34,7 +35,7 @@ public class BookingService
     {
         try
         {
-            var response = await _httpClient.GetFromJsonAsync<List<BookingDto>>($"/api/laundryroom/{laundryRoomId}");
+            var response = await _httpClient.GetFromJsonAsync<List<BookingDto>>($"/api/Booking/laundryroom/{laundryRoomId}");
             return response ?? new List<BookingDto>();
         }
         catch (HttpRequestException ex)
@@ -109,16 +110,20 @@ public class BookingService
     {
         try
         {
-            var bookingRequest = new
+            
+            var parsedDate = DateTime.Parse(bookingDate); // Parse a string to a DateTime for storing in db later
+            var formattedDate = parsedDate.ToString("yyyy-MM-dd"); 
+            
+            var bookingRequest = new BookingRequestDto()
             {
                 UserId = userId,
                 MachineId = machineId,
-                BookingDate = bookingDate,
+                BookingDate = DateTime.Parse(formattedDate), 
                 TimeslotId = timeslotId,
                 LaundryRoomId = laundryRoomId
             };
 
-            var response = await _httpClient.PostAsJsonAsync($"/api/booking", bookingRequest);
+            var response = await _httpClient.PostAsJsonAsync($"/api/booking/booking", bookingRequest);
 
             if (response.IsSuccessStatusCode)
             {

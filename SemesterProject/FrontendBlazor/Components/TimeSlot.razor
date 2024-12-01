@@ -5,24 +5,52 @@
     [Parameter] public bool IsAvailable { get; set; }
     [Parameter] public DateTime SelectedDate { get; set; }
     [Parameter] public int TimeSlotId { get; set; }
-    [Parameter] public EventCallback<(string Apartment, string StartTime, string EndTime, int TimeSlotId)> OnBookSlot { get; set; }
+    [Parameter] public Func<int, Task<bool>> BookSelectedTimeSlot { get; set; }
+    [Parameter] public bool AllowShowUserInfo { get; set; }
 
-    private async Task HandleClick()
+
+    private bool showConfirmation = false; // Track if the confirmation prompt should be displayed
+
+    private void ConfirmBooking()
     {
         if (IsAvailable)
         {
-            await OnBookSlot.InvokeAsync((Apartment, StartTime, EndTime, TimeSlotId));
+            showConfirmation = true; // Show the confirmation modal COMPONENT
         }
         else
         {
             Console.WriteLine("Slot not available");
         }
     }
+
+    private async Task HandleConfirm()
+    {
+        showConfirmation = false; // Hide the confirmation modal
+        var isBookingSuccessful = await BookSelectedTimeSlot.Invoke(TimeSlotId);
+
+        if (isBookingSuccessful) // Check if the callback returned true
+        {
+            IsAvailable = false; // Set IsAvailable only if the callback is successful
+            Console.WriteLine("Booking confirmed and slot marked as unavailable.");
+        }
+        else
+        {
+            Console.WriteLine("Booking failed. Slot remains available.");
+        }
+        StateHasChanged();
+    }
+
+    private void HandleCancel()
+    {
+        showConfirmation = false; // Hide the confirmation modal
+        Console.WriteLine("Booking cancelled by the user");
+    }
 }
 
-<div class="pt-4">
-    <div @onclick="HandleClick" 
-         class="pt-4 rounded-md shadow-md w-3/5 mx-auto @(IsAvailable ? "bg-green-500" : "bg-red-500") text-white transform transition-transform duration-200 hover:scale-105">
+<div class="pt-4 max-w-lg mx-auto">
+    <div @onclick="ConfirmBooking" 
+         class="pt-4 rounded-md shadow-md w-full mx-auto 
+                @(IsAvailable ? "bg-green-500" : "bg-red-500") text-white transform transition-transform duration-200 hover:scale-105">
         <div class="flex-grow text-center">
             <h3 class="text-2xl font-semibold">@($"{StartTime} - {EndTime}")</h3>
             <p class="text-sm">@SelectedDate.ToString("dddd, d/M/yyyy")</p>
@@ -31,8 +59,31 @@
         @if (!IsAvailable)
         {
             <div class="flex justify-end">
-                <p class="ml-4 text-xl font-medium">@Apartment</p>
-            </div>
+                @if (AllowShowUserInfo)
+                {
+                        <p class="ml-4 text-xl font-medium">@Apartment</p>
+                }
+                </div>
         }
     </div>
 </div>
+
+<!-- Confirmation Modal -->
+@if (showConfirmation)
+{
+    <div class="bg-gray-100 p-4 rounded-lg shadow-lg mt-2">
+        <h2 class="text-lg font-semibold text-gray-700">Confirm Booking</h2>
+        <p class="text-sm text-gray-600 mt-2">
+            Are you sure you want to book the slot <strong>@($"{StartTime} - {EndTime}")</strong>
+            on <strong>@SelectedDate.ToString("dddd, d/M/yyyy")</strong>?
+        </p>
+        <div class="flex justify-end mt-4 space-x-2">
+            <button @onclick="HandleCancel" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                Cancel
+            </button>
+            <button @onclick="HandleConfirm" class="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+}

@@ -59,31 +59,45 @@ namespace BackendAPI.Controllers
         {
             try
             {
+                // Fetch and map bookings data
                 var bookings = _context.Bookings
                     .Include(b => b.User)
                     .Include(b => b.Timeslot)
                     .Where(b => b.LaundryRoomId == laundryRoomId)
-                    .Select(b => new BookingDto
+                    .Select(b => new
                     {
-                        BookingId = b.BookingId,
-                        UserId = b.UserId,
-                        MachineId = b.MachineId,
-                        BookingDate = b.BookingDate,
-                        Apartment = b.User.Apartment,
-                        FullName = b.User.FullName,
-                        StartTime = b.Timeslot.StartTime.ToString(@"hh\:mm"),
-                        EndTime = b.Timeslot.EndTime.ToString(@"hh\:mm"),
-                        LaundryRoomId = b.LaundryRoomId
-                    }).ToList();
+                        bookingId = b.BookingId,
+                        userId = b.UserId,
+                        machineId = b.MachineId,
+                        bookingDate = b.BookingDate,
+                        apartment = b.User.Apartment,
+                        fullName = b.User.FullName,
+                        startTime = b.Timeslot.StartTime.ToString(@"hh\:mm"),
+                        endTime = b.Timeslot.EndTime.ToString(@"hh\:mm"),
+                        TimeSlotId = b.Timeslot.TimeslotId,
+                        laundryRoomId = b.LaundryRoomId
+                    })
+                    .ToList();
+                
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles // Avoid $id and $values
+                };
+                
+                
 
-                return Ok(bookings);
+                // Return the explicitly shaped response
+                return new JsonResult(bookings, options);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                // Log the exception and return an error response
+                Console.WriteLine($"Error fetching bookings for laundry room {laundryRoomId}: {e.Message}");
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
         // 3. Get a specific booking by booking ID
         [HttpGet("{bookingId}")]
@@ -256,8 +270,24 @@ namespace BackendAPI.Controllers
 
                 _context.Bookings.Add(newBooking);
                 _context.SaveChanges();
+                
+                
+                
+                // Map the new booking to a DTO to return
+                var createdBooking = new BookingDto
+                {
+                    BookingId = newBooking.BookingId,
+                    UserId = newBooking.UserId,
+                    MachineId = newBooking.MachineId,
+                    BookingDate = newBooking.BookingDate,
+                    StartTime = _context.Timeslots.FirstOrDefault(t => t.TimeslotId == newBooking.TimeslotId)?.StartTime.ToString(@"hh\:mm"),
+                    EndTime = _context.Timeslots.FirstOrDefault(t => t.TimeslotId == newBooking.TimeslotId)?.EndTime.ToString(@"hh\:mm"),
+                    LaundryRoomId = newBooking.LaundryRoomId,
+                    Apartment = _context.Users.FirstOrDefault(u => u.Id == newBooking.UserId)?.Apartment,
+                    FullName = _context.Users.FirstOrDefault(u => u.Id == newBooking.UserId)?.FullName
+                };
 
-                return Ok("Booking successfully created.");
+                return Ok(createdBooking);
             }
             catch (Exception e)
             {

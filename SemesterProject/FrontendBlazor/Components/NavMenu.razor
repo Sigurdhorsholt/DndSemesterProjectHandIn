@@ -40,16 +40,18 @@
             <!-- Conditionally show admin and user dashboard links -->
             @if (AuthState.IsAuthenticated)
             {
-            @if (AuthState.CurrentUser.IsAdmin)
+
+                Console.WriteLine("From navmenu: Authstate: " + AuthState.CurrentUser.IsAdmin);
+                @if (AuthState.CurrentUser.IsAdmin)
             {
             <li class="nav-item">
-                <NavLink class="nav-link text-blue-500" href="/admin-dashboard">
+                <NavLink class="nav-link text-blue-500" href="/AdminDashboard">
                     Admin Dashboard
                 </NavLink>
             </li>
             }
             <li class="nav-item">
-                <NavLink class="nav-link text-blue-500" href="/user-dashboard">
+                <NavLink class="nav-link text-blue-500" href="/UserDashboard">
                     User Dashboard
                 </NavLink>
             </li>
@@ -87,6 +89,18 @@ private bool isMenuOpen = false;
 
 private string? NavMenuCssClass => isMenuOpen ? "block" : "hidden";
 
+
+
+protected override void OnInitialized()
+{
+    // Subsce to auth state changes
+    AuthState.OnStateChanged += HandleAuthStateChanged; // Subscribe to state changes
+}
+
+private void HandleAuthStateChanged()
+{
+    StateHasChanged(); // Re-render when auth state changes
+}
 private void ToggleNavMenu()
 {
 isMenuOpen = !isMenuOpen;
@@ -101,5 +115,10 @@ Navigation.NavigateTo("/login");
 private void NavigateHome()
 {
 Navigation.NavigateTo("/");
+}
+
+public void Dispose()
+{
+    AuthState.OnStateChanged -= HandleAuthStateChanged; // Unsubscribe to avoid memory leaks
 }
 }

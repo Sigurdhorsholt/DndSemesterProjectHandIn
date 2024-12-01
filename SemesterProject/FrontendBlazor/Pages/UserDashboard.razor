@@ -1,118 +1,194 @@
 @page "/UserDashboard"
-@using System.Runtime.InteropServices.JavaScript
-@using FrontendBlazor.Model.DTOs
 @inject LaundryRoomService LaundryRoomService
-@inject BookingService BookingService
 @inject AuthStateService AuthState
+@inject BookingService BookingService
+@using FrontendBlazor.Components
+@using FrontendBlazor.Model.DTOs
 
-<h1 class="text-4xl font-bold">User Dashboard</h1>
 
-<!-- Week Navigation -->
-<Dateselector SelectedDate="@selectedDate" SelectedDateChanged="@OnDateSelected" />
+<h1 class="text-4xl font-bold text-center mt-6">User Dashboard</h1>
 
-@if (LaundryRoomService.AccessibleRooms?.Count > 1)
-{
-    <label class="block mt-4">
-        <span class="text-sm font-medium">Select Laundry Room:</span>
-        <select @bind="selectedLaundryRoomId" class="px-4 py-2 rounded border mt-2">
-            @foreach (var room in LaundryRoomService.AccessibleRooms)
-            {
-                <option value="@room.LaundryRoomId">@room.RoomName</option>
-            }
-        </select>
-    </label>
-}
 
-@if (LaundryRoomService.AccessibleMachines?.Count > 1 && selectedLaundryRoomId.HasValue)
-{
-    <label class="block mt-4">
-        <span class="text-sm font-medium">Select Machine:</span>
-        <select @bind="selectedMachineId" class="px-4 py-2 rounded border mt-2">
-            @foreach (var machine in LaundryRoomService.AccessibleMachines.Where(m => m.LaundryRoomId == selectedLaundryRoomId.Value))
-            {
-                <option value="@machine.MachineId">@machine.MachineName</option>
-            }
-        </select>
-    </label>
-}
+<div>
 
-<div class="mt-6">
-    @foreach (var slot in timeSlots)
-    {
-        <TimeSlot Apartment="Figure this one out later...."
-                  StartTime="@slot.StartTime.ToString()"
-                  EndTime="@slot.EndTime.ToString()"
-                  IsAvailable="true"
-                  SelectedDate="@selectedDate"
-                  TimeSlotId="@slot.TimeslotId"
-                  OnBookSlot="@OnBookSlot" />
-    }
+<!-- Centered Date Selector -->
+<div class="flex justify-center items-center mt-10">
+    <DateSelector SelectedDate="@selectedDate" SelectedDateChanged="OnDateSelected" />
 </div>
+
+
+    <!-- Available Machines -->
+    <div class="mt-10">
+        <AvailableMachines Machines="@LaundryRoomService.ComplexSettings.LaundryMachines"
+                           OnMachineSelected="HandleMachineSelected"
+                           TriggerFlash="@triggerFlashForMachines" />
+    </div>
+
+<!-- TimeSlots here -->
+    <div class="flex flex-col items-center mt-10 space-y-6 w-full">
+        
+        @if (LaundryRoomService.TimeSlotsFromSettings?.Any() == true)
+        {
+            @foreach (var timeslot in FilterTimeSlotsForSelectedDate())
+            {
+                <div class="w-3/5">
+                    <TimeSlot
+                        Apartment="@GetApartmentForTimeslot(timeslot.TimeslotId)"
+                        StartTime="@timeslot.StartTime.ToString(@"hh\:mm")"
+                        EndTime="@timeslot.EndTime.ToString(@"hh\:mm")"
+                        IsAvailable="@IsTimeslotAvailable(timeslot.TimeslotId)"
+                        SelectedDate="@selectedDate"
+                        TimeSlotId="@timeslot.TimeslotId"
+                        AllowShowUserInfo="@LaundryRoomService.ComplexSettings.AllowShowUserInfo"
+                        BookSelectedTimeSlot="OnBookSelectedTimeSlot" />
+                </div>
+            }
+        } else
+        {
+        <div class="text-gray-500 text-center mt-4">No timeslots available for the selected date.</div>
+        }
+    </div>
+</div>
+
 
 @code {
     private DateTime selectedDate = DateTime.Today;
-    private int? selectedLaundryRoomId;
-    private int? selectedMachineId;
-    private List<TimeSlotDto> timeSlots = new();
+    private string? errorMessage;
+    private LaundryMachineDto selectedMachine;
+    private bool triggerFlashForMachines = false;
 
+
+
+    private async Task<bool> OnBookSelectedTimeSlot(int TimeSlotId)
+    {
+        
+        if (selectedMachine == null)
+        {
+            Console.WriteLine("Error: No machine selected for booking.");
+            triggerFlashForMachines = true;
+            await Task.Delay(100); 
+            triggerFlashForMachines = false;
+            return false;
+        }
+        
+        
+        Console.WriteLine($"UserDashboard - Booked Time Slot: {TimeSlotId}");
+
+        var userId = AuthState.CurrentUser.Id;
+        var BookingDate = selectedDate;
+        var timeslotId = TimeSlotId;
+        var laundryroomId = LaundryRoomService.AccessibleRooms.FirstOrDefault().LaundryRoomId;
+        var machineId = selectedMachine.MachineId;
+        
+
+        try
+        {
+            BookingDto CreatedBooking = await BookingService.CreateBooking(userId,machineId,BookingDate.ToString(),timeslotId,laundryroomId);
+            Console.WriteLine("Created Booking: " + CreatedBooking.BookingId + " at: " + CreatedBooking.BookingDate + ", " + CreatedBooking.StartTime);
+            
+            // Add the new booking to the state
+            LaundryRoomService.BookingsForLaundryRoom.Add(CreatedBooking);
+
+            // Ensure the parent component is aware of the change
+            await InvokeAsync(StateHasChanged);
+
+            return true;
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
+        
+    }
+    
+    
     protected override async Task OnInitializedAsync()
-    {
-        // Fetch accessible rooms and machines for the current user
-        await LaundryRoomService.FetchAccessibleRoomsAndMachinesAsync(AuthState.CurrentUser.Id);
-
-        // Fetch time slots and bookings if a laundry room is already selected
-        if (selectedLaundryRoomId.HasValue)
-        {
-            await FetchTimeSlotsAndBookings();
-        }
-    }
-
-    private async Task OnDateSelected(DateTime date)
-    {
-        selectedDate = date;
-        if (selectedLaundryRoomId.HasValue)
-        {
-            await FetchTimeSlotsAndBookings();
-        }
-    }
-
-    private async Task OnLaundryRoomChanged(int? newRoomId)
-    {
-        selectedLaundryRoomId = newRoomId;
-
-        // Re-fetch the available machines if a room is selected
-        if (selectedLaundryRoomId.HasValue)
-        {
-            await FetchTimeSlotsAndBookings();
-        }
-    }
-
-    private async Task FetchTimeSlotsAndBookings()
-    {
-        if (selectedLaundryRoomId.HasValue)
-        {
-            timeSlots = await LaundryRoomService.GetTimeSlotsForLaundryRoom(selectedLaundryRoomId.Value);
-        }
-    }
-
-    private async Task OnBookSlot((string Apartment, string StartTime, string EndTime, int TimeSlotId) slotDetails)
     {
         try
         {
-                
-            await BookingService.CreateBooking(
-                AuthState.CurrentUser.Id,
-                selectedMachineId.Value,
-                "Today - worng fix later",  
-                slotDetails.TimeSlotId,
-                selectedLaundryRoomId.Value);
-
-            // Re-fetch the time slots after booking to update availability
-            await FetchTimeSlotsAndBookings();
+            await SetStateDataForUserDashboard();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Booking failed: {ex.Message}");
+            errorMessage = $"An error occurred: {ex.Message}";
+            Console.WriteLine($"Error initializing User Dashboard: {ex}");
         }
+    }
+
+   
+
+    private void OnDateSelected(DateTime date)
+    {
+        selectedDate = date;
+        Console.WriteLine($"Selected Date in user dashboard: {selectedDate}");
+    }
+    
+    
+    private void FetchBookings()
+    {
+    }
+
+    private async Task SetStateDataForUserDashboard()
+    {
+
+
+        try
+        {
+            await LaundryRoomService.SetAccessibleRooms(AuthState.CurrentUser.Id);
+           // Console.WriteLine("User dashboard loaded. State is set.. User: " + AuthState.CurrentUser.UserName + ", rooms: " + LaundryRoomService.AccessibleRooms.FirstOrDefault().LaundryRoomId);
+            
+            
+            await LaundryRoomService.SetTimeSlots(LaundryRoomService.AccessibleRooms.FirstOrDefault().LaundryRoomId);
+            //Console.WriteLine("Timeslots set: " + LaundryRoomService.TimeSlotsFromSettings.FirstOrDefault().StartTime);
+
+
+            await LaundryRoomService.SetSettingsForLaundryRoom(LaundryRoomService.AccessibleRooms.FirstOrDefault().LaundryRoomId);
+
+
+            await LaundryRoomService.SetBookingsForLaundryRoom(LaundryRoomService.AccessibleRooms.FirstOrDefault().LaundryRoomId);
+            Console.WriteLine("bookings fetched in dashboard set: " + LaundryRoomService.BookingsForLaundryRoom.FirstOrDefault().BookingDate);
+
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
+    }
+    
+    private IEnumerable<TimeSlotDto> FilterTimeSlotsForSelectedDate()
+    { 
+        return LaundryRoomService.TimeSlotsFromSettings
+            //.Where(ts => ts.StartTime.TotalMinutes >= selectedDate.Date.TimeOfDay.TotalMinutes) // Example filter
+            .OrderBy(ts => ts.StartTime); // Ensure sorting is applied
+    }    
+    private string GetApartmentForTimeslot(int timeslotId)
+    {
+        
+        if (!LaundryRoomService.ComplexSettings.AllowShowUserInfo)
+        {
+            return "Unavailable"; // Hide the apartment information
+        }
+        
+        return LaundryRoomService.BookingsForLaundryRoom
+            .FirstOrDefault(b => b.TimeSlotId == timeslotId)?.Apartment ?? "apartment not available";
+    }
+    private bool IsTimeslotAvailable(int timeslotId)
+    {
+        var isAvailable = !LaundryRoomService.BookingsForLaundryRoom.Any(b =>
+            b.TimeSlotId == timeslotId && b.BookingDate.Date == selectedDate.Date);
+        return isAvailable;
+
+    }
+    
+    private void HandleMachineSelected(LaundryMachineDto machine)
+    {
+        selectedMachine = machine;
+        Console.WriteLine($"Selected Machine: {machine.MachineName} (ID: {machine.MachineId})");
     }
 }

@@ -1,0 +1,57 @@
+@using FrontendBlazor.Model.DTOs
+@code {
+    [Parameter] public List<LaundryMachineDto> Machines { get; set; } = new();
+    [Parameter] public EventCallback<LaundryMachineDto> OnMachineSelected { get; set; }
+    [Parameter] public bool TriggerFlash { get; set; } // A parameter for flashing the component if one isnt selected when a booking attempt is made!
+
+    private LaundryMachineDto selectedMachine;
+    private bool isFlashing = false;
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TriggerFlash)
+        {
+            await Flash(); // Start flashing if triggered
+        }
+    }
+    private async Task Flash()
+    {
+        isFlashing = true;
+        for (int i = 0; i < 3; i++) // Flash 3 times
+        {
+            StateHasChanged();
+            await Task.Delay(300); // Short delay for flash effect
+        }
+        isFlashing = false;
+        StateHasChanged();
+    }
+
+
+    private async Task SelectMachine(LaundryMachineDto machine)
+    {
+        selectedMachine = machine; // Update local selection state
+        await OnMachineSelected.InvokeAsync(machine); // Notify parent component
+    }
+}
+
+<div class="mt-6">
+    <h2 class="text-lg font-bold text-center">Available Machines</h2>
+    <div class="grid grid-cols-1 gap-4 mt-4">
+        @if (Machines?.Any() == true)
+        {
+            @foreach (var machine in Machines)
+            {
+                <div @onclick="() => SelectMachine(machine)"
+                     class="cursor-pointer p-4 rounded-lg shadow-md transition transform hover:scale-105
+                            @(selectedMachine?.MachineId == machine.MachineId ? "bg-teal-500 text-white" : isFlashing ? "bg-red-500 text-white" : "bg-gray-200 text-gray-700")">
+                    <h3 class="text-xl font-semibold">@machine.MachineName</h3>
+                    <p class="text-sm">Type: @machine.MachineType</p>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-gray-500">No machines available</p>
+        }
+    </div>
+</div>

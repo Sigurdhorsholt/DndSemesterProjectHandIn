@@ -24,6 +24,7 @@ public class BookingDto
     public string StartTime { get; set; }
     public string EndTime { get; set; }
     public int LaundryRoomId { get; set; }
+    public int TimeSlotId { get; set; }
 }
     
 public class BookingRequestDto

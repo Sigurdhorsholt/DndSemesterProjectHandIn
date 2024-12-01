@@ -1,0 +1,18 @@
+<div class="mt-8 border-t-2 border-black-900">
+    <h2 class="font-bold text-xl">User Settings</h2>
+
+    <div class="flex items-center mt-4">
+        <input type="number" @bind="MaxBookingsPerUser" class="p-2 border rounded w-20" />
+        <p class="ml-2">Maximum bookings per user</p>
+    </div>
+
+    <div class="flex items-center mt-4">
+        <input type="checkbox" @bind="AllowShowUserInfo" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded" />
+        <label class="ml-2">Allow showing user names</label>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int MaxBookingsPerUser { get; set; }
+    [Parameter] public bool AllowShowUserInfo { get; set; }
+}

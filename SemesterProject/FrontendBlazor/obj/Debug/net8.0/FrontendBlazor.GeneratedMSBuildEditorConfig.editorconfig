@@ -1,0 +1,87 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = FrontendBlazor
+build_property.RootNamespace = FrontendBlazor
+build_property.ProjectDir = C:\Users\sigur\OneDrive\Dokumenter\GitHub\DndSemesterProjectHandIn\SemesterProject\FrontendBlazor\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\sigur\OneDrive\Dokumenter\GitHub\DndSemesterProjectHandIn\SemesterProject\FrontendBlazor
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/AvailableMachines.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBdmFpbGFibGVNYWNoaW5lcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/DateSelector.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xEYXRlU2VsZWN0b3IucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/MachineSettings.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xNYWNoaW5lU2V0dGluZ3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xOYXZNZW51LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/Settings.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTZXR0aW5ncy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/TimeSlot.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUaW1lU2xvdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/TimeSlotSettings.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xUaW1lU2xvdFNldHRpbmdzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/UserManagement.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xVc2VyTWFuYWdlbWVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Components/UserSettings.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xVc2VyU2V0dGluZ3MucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Pages/AdminDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5EYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/Pages/UserDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlckRhc2hib2FyZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/sigur/OneDrive/Dokumenter/GitHub/DndSemesterProjectHandIn/SemesterProject/FrontendBlazor/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 

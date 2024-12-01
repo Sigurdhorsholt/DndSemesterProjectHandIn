@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackendAPI", "BackendAPI\BackendAPI.csproj", "{DEAC62C0-F118-4440-B351-18169A5A7196}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendBlazor", "FrontendBlazor\FrontendBlazor.csproj", "{3CAF312B-46AD-4508-BD08-D8E1AA498712}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEAC62C0-F118-4440-B351-18169A5A7196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEAC62C0-F118-4440-B351-18169A5A7196}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEAC62C0-F118-4440-B351-18169A5A7196}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEAC62C0-F118-4440-B351-18169A5A7196}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CAF312B-46AD-4508-BD08-D8E1AA498712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CAF312B-46AD-4508-BD08-D8E1AA498712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CAF312B-46AD-4508-BD08-D8E1AA498712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CAF312B-46AD-4508-BD08-D8E1AA498712}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

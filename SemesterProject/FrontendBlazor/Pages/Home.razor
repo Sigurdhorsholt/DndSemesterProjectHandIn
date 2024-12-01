@@ -1,0 +1,44 @@
+﻿@page "/"
+@inject AuthStateService AuthState
+@using Microsoft.AspNetCore.Components.Routing
+@using FrontendBlazor.Components
+
+
+<div class="min-h-screen flex flex-col">
+    <!-- Header Section -->
+    <header class="bg-teal-500 text-white py-12 px-4 text-center">
+        @if (AuthState.IsAuthenticated)
+        {
+            <h1 class="text-4xl font-bold">Welcome, @AuthState.CurrentUser.UserName</h1>
+            <button @onclick="Logout" class="mt-4 px-6 py-3 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600">
+                Log Out
+            </button>
+        }
+        else
+        {
+            <h1 class="text-4xl font-bold">Welcome to the LayndryBooker</h1>
+            
+            
+            <Login></Login>
+            
+            
+            <div class="p-5 m-5">
+                <NavLink href="/signup" class="px-6 py-3 bg-teal-700 text-white font-semibold rounded-lg shadow-md hover:bg-teal-600">
+                    Sign Up
+                </NavLink>
+            </div>
+        }
+    </header>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-800 text-white py-6 text-center mt-auto">
+        <p>Footer Content Here</p>
+    </footer>
+</div>
+
+@code {
+    private void Logout()
+    {
+        AuthState.Logout();
+    }
+}

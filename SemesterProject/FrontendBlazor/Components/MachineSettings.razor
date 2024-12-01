@@ -1,0 +1,55 @@
+@using FrontendBlazor.Model.DTOs
+
+<div class="mt-8 border-t-2 border-black-900">
+    <h2 class="font-bold text-xl">Machine Settings</h2>
+
+    <div class="flex space-x-2 mt-4">
+        <input type="text" @bind="newMachineName" placeholder="Machine Name" class="p-2 border rounded" />
+        <select @bind="newMachineType" class="p-2 border rounded">
+            <option value="">Select Type</option>
+            <option value="Washer">Washer</option>
+            <option value="Dryer">Dryer</option>
+        </select>
+        <button @onclick="AddMachine"  class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Add Machine
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p class="text-red-500 mt-2">@errorMessage</p>
+    }
+
+    <ul class="mt-4">
+        @foreach (var machine in LaundryMachines)
+        {
+            <li>@machine.MachineName (@machine.MachineType)</li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter] public List<LaundryMachineDto> LaundryMachines { get; set; }
+    private string newMachineName;
+    private string newMachineType;
+    private string? errorMessage;
+
+    private void AddMachine()
+    {
+        if (string.IsNullOrEmpty(newMachineName) || string.IsNullOrEmpty(newMachineType))
+        {
+            errorMessage = "Machine name and type are required.";
+            return;
+        }
+
+        LaundryMachines.Add(new LaundryMachineDto
+        {
+            MachineName = newMachineName,
+            MachineType = newMachineType
+        });
+
+        newMachineName = string.Empty;
+        newMachineType = string.Empty;
+        errorMessage = null;
+    }
+}
