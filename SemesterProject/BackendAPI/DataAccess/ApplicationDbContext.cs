@@ -19,22 +19,21 @@ namespace BackendAPI.DataAccess
         public DbSet<AdminManages> AdminManages { get; set; }
         public DbSet<ComplexSettings> ComplexSettings { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
-    base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
 
-    // Mapping entities to corresponding tables
-    modelBuilder.Entity<User>().ToTable("User");
-    modelBuilder.Entity<ApartmentComplex>().ToTable("ApartmentComplexes");
-    modelBuilder.Entity<LivesIn>().ToTable("LivesIn");
-    modelBuilder.Entity<Booking>().ToTable("Booking");
-    modelBuilder.Entity<Timeslot>().ToTable("Timeslots");
-    modelBuilder.Entity<LaundryRoom>().ToTable("LaundryRoom");
-    modelBuilder.Entity<LaundryMachine>().ToTable("LaundryMachine");
-    modelBuilder.Entity<ComplexSettings>().ToTable("ComplexSettings");
-    modelBuilder.Entity<ComplexTimeslotConfig>().ToTable("Complex_Timeslot_Config");
-    modelBuilder.Entity<AdminManages>().ToTable("AdminManages");
+            // Mapping entities to corresponding tables
+            modelBuilder.Entity<User>().ToTable("User");
+            modelBuilder.Entity<ApartmentComplex>().ToTable("ApartmentComplexes");
+            modelBuilder.Entity<LivesIn>().ToTable("LivesIn");
+            modelBuilder.Entity<Booking>().ToTable("Booking");
+            modelBuilder.Entity<Timeslot>().ToTable("Timeslots");
+            modelBuilder.Entity<LaundryRoom>().ToTable("LaundryRoom");
+            modelBuilder.Entity<LaundryMachine>().ToTable("LaundryMachine");
+            modelBuilder.Entity<ComplexSettings>().ToTable("ComplexSettings");
+            modelBuilder.Entity<ComplexTimeslotConfig>().ToTable("Complex_Timeslot_Config");
+            modelBuilder.Entity<AdminManages>().ToTable("AdminManages");
 
     // Define primary key for LaundryMachine
     modelBuilder.Entity<LaundryMachine>()
