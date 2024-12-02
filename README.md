@@ -80,3 +80,10 @@ Daily Users:
 
 
 Admin Users:
+-	*"As an admin, I want to create, update, or delete user accounts so that I can manage user access to the system effectively."*
+- *"As an admin, I want to add, modify, or remove laundry time slots so that I can ensure the booking system reflects the correct availability."*
+-	*"As an admin, I want to override and cancel a user's booking in special circumstances so that I can manage conflicts or errors in the schedule."*
+- *"As an admin, I want to view a dashboard of all bookings, including user details and time slots, so that I can monitor the system's usage and address any issues."*
+- *"As an admin, I want to configure and manage notification settings for users so that the system sends confirmations and reminders appropriately."*
+- *"As an admin, I want to download or generate reports of system usage and bookings so that I can provide documentation for audits or compliance purposes."*
+- *"As an admin, I want to send announcements or messages to all users so that I can communicate important updates or changes to the system."*
