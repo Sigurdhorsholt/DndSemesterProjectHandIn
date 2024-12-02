@@ -68,9 +68,8 @@ The user stories will cover the range of requirements for different user roles i
 
 Daily Users:
 - *"As a user, I want to log into the system so that I can access the laundy booking system"*
-- *"As a user, I want to reset my password via email in case I forget it so that I can regain access to my account without needing help from an admin."*
 - *"As a User, I want to view my current and upcoming laundry bookings on the homepage so that I can manage my laundry schedule effectively"*
-- *"As a User, I want to scrool through available laundry time slots so that I can choose a time that fits me to do my laundry."*
+- *"As a User, I want to scroll through available laundry time slots so that I can choose a time that fits me to do my laundry."*
 - *"As a User, I want the system to temporarily lock the time slot I am selecting during the booking process so that no one else can book it until I confirm or cancel."*
 - *"As a User, I want to receive a confirmation of my booking once I finalize it so that I know my slot is successfully reserved."*
 - *"As a User, I want to cancel or modify my laundry booking so that I can free up the time slot or reschedule my laundry if needed."*
@@ -80,10 +79,11 @@ Daily Users:
 
 
 Admin Users:
+- *"As an admin, I want to be able to see a dashboard with settings that normal users can't see when they log in"*
 -	*"As an admin, I want to create, update, or delete user accounts so that I can manage user access to the system effectively."*
 - *"As an admin, I want to add, modify, or remove laundry time slots so that I can ensure the booking system reflects the correct availability."*
 -	*"As an admin, I want to override and cancel a user's booking in special circumstances so that I can manage conflicts or errors in the schedule."*
-- *"As an admin, I want to view a dashboard of all bookings, including user details and time slots, so that I can monitor the system's usage and address any issues."*
-- *"As an admin, I want to configure and manage notification settings for users so that the system sends confirmations and reminders appropriately."*
-- *"As an admin, I want to download or generate reports of system usage and bookings so that I can provide documentation for audits or compliance purposes."*
-- *"As an admin, I want to send announcements or messages to all users so that I can communicate important updates or changes to the system."*
+
+- *"As an admin, I want to configure and manage settings for each laundry room individually in the case i have to be an Admin for multible rooms.."*
+- *"As an admin, I want to manage Users for each Laundry room. I want to be able to register new users to a laundry room and i want to be able to delete users that should have their access removed.."*
+
