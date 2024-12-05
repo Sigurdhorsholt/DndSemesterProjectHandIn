@@ -15,6 +15,10 @@ namespace BackendAPI.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
+        
+        
+                // Constructor to inject the database context and configuration
+
         public BookingController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -27,6 +31,8 @@ namespace BackendAPI.Controllers
         {
             try
             {
+                                // Fetch bookings for the specified user, including user and timeslot details
+
                 var bookings = _context.Bookings
                     .Include(b => b.User)
                     .Include(b => b.Timeslot)
@@ -59,7 +65,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Fetch and map bookings data
+                // Fetch bookings for the specified laundry room
                 var bookings = _context.Bookings
                     .Include(b => b.User)
                     .Include(b => b.Timeslot)
@@ -79,6 +85,8 @@ namespace BackendAPI.Controllers
                     })
                     .ToList();
                 
+                
+                                // Serialize the response to avoid reference cycles
                 var options = new System.Text.Json.JsonSerializerOptions
                 {
                     WriteIndented = true,
@@ -143,14 +151,14 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Step 1: Fetch data from the database
+                // Fetch bookings for the specified machine
                 var bookingsData = _context.Bookings
                     .Include(b => b.User)
                     .Include(b => b.Timeslot)
                     .Where(b => b.MachineId == machineId)
                     .ToList();
 
-                // Step 2: Map to DTOs, handling nulls where necessary
+                // Map bookings to DTOs
                 var bookings = bookingsData.Select(b => new BookingDto
                 {
                     BookingId = b.BookingId,

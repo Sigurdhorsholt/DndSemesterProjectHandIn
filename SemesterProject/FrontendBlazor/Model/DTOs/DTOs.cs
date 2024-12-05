@@ -99,12 +99,12 @@ public class LaundryMachineDto
 
 public class ComplexSettingsDto
 {
-    public int LaundryRoomId { get; set; } // Identifier for the laundry room the settings are associated with
-    public int ComplexId { get; set; } // Identifier for the complex to which the laundry room belongs
-    public int MaxBookingsPerUser { get; set; } // Maximum bookings allowed per user
-    public bool AllowShowUserInfo { get; set; } // Whether to allow showing user information (e.g., names)
-    public List<TimeSlotDto> TimeSlots { get; set; } = new List<TimeSlotDto>(); // List of available time slots
-    public List<LaundryMachineDto> LaundryMachines { get; set; } = new List<LaundryMachineDto>(); // List of laundry machines in the laundry room
+    public int LaundryRoomId { get; set; }
+    public int ComplexId { get; set; } 
+    public int MaxBookingsPerUser { get; set; } 
+    public bool AllowShowUserInfo { get; set; } 
+    public List<TimeSlotDto> TimeSlots { get; set; } = new List<TimeSlotDto>(); 
+    public List<LaundryMachineDto> LaundryMachines { get; set; } = new List<LaundryMachineDto>(); 
 }
 
 

@@ -29,21 +29,8 @@ public IActionResult SaveLaundryRoomSettings(int roomId, [FromBody] ComplexSetti
     Console.WriteLine($"SaveLaundryRoomSettings called for Room ID: {roomId}");
     Console.WriteLine($"Received settings DTO: {System.Text.Json.JsonSerializer.Serialize(settingsDto)}");
 
-
-    /*
-    if (!User.Identity.IsAuthenticated)
-    {
-        Console.WriteLine($"[ERROR] Unauthorized attempt to save settings for Room ID: {roomId}");
-        return Unauthorized(new { message = "Unauthorized save" });
-    }
-    */
-
     try
-    {
-        
-        
-        
-        
+    {        
         // Get the laundry room
         Console.WriteLine($"[INFO] Fetching LaundryRoom with ID: {roomId}");
         var laundryRoom = _context.LaundryRooms
@@ -278,114 +265,6 @@ public IActionResult GetLaundryRoomSettings(int roomId)
 
             return machines;
         }
-        
-        /*
-        [HttpPost("timeslot")]
-        public IActionResult AddTimeSlot([FromBody] TimeslotDto slotDto)
-        {
-            if (slotDto == null)
-            {
-                Console.WriteLine("Slot is null");
-                return BadRequest(new { message = "Time slot data is required." });
-            }
-
-            Console.WriteLine($"Received Timeslot: StartTime={slotDto.StartTime}, EndTime={slotDto.EndTime}, ComplexId={slotDto.ComplexId}");
-
-            try
-            {
-                var newSlot = new Timeslot
-                {
-                    StartTime = slotDto.StartTime,
-                    EndTime = slotDto.EndTime,
-                    ComplexId = slotDto.ComplexId,
-                };
-
-                _context.Timeslots.Add(newSlot);
-                _context.SaveChanges();
-
-                var createdSlot = new TimeslotDto
-                {
-                    TimeslotId = newSlot.TimeslotId,
-                    StartTime = newSlot.StartTime,
-                    EndTime = newSlot.EndTime,
-                    ComplexId = newSlot.ComplexId
-                };
-
-                return Ok(createdSlot);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error adding time slot: {e.Message}");
-                return StatusCode(500, new { message = "Failed to add time slot.", error = e.Message });
-            }
-        }
-
-            
-        
-        [HttpPut("timeslot/{id}")]
-        public IActionResult UpdateTimeSlot(int id, [FromBody] TimeslotDto slotDto)
-        {
-            try
-            {
-                if (slotDto == null || id <= 0)
-                {
-                    return BadRequest(new { message = "Invalid time slot data or ID." });
-                }
-
-                // Find the existing time slot
-                var existingSlot = _context.Timeslots.FirstOrDefault(ts => ts.TimeslotId == id);
-                if (existingSlot == null)
-                {
-                    return NotFound(new { message = "Time slot not found." });
-                }
-
-                // Update fields
-                existingSlot.StartTime = slotDto.StartTime;
-                existingSlot.EndTime = slotDto.EndTime;
-
-                // Save changes
-                _context.SaveChanges();
-
-                return Ok(new { message = "Time slot updated successfully." });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error updating time slot: {e.Message}");
-                return StatusCode(500, new { message = "Failed to update time slot.", error = e.Message });
-            }
-        }
-
-        
-        [HttpDelete("timeslot/{id}")]
-        public IActionResult DeleteTimeSlot(int id)
-        {
-            try
-            {
-                if (id <= 0)
-                {
-                    return BadRequest(new { message = "Invalid time slot ID." });
-                }
-
-                // Find the time slot
-                var slot = _context.Timeslots.FirstOrDefault(ts => ts.TimeslotId == id);
-                if (slot == null)
-                {
-                    return NotFound(new { message = "Time slot not found." });
-                }
-
-                // Remove the slot
-                _context.Timeslots.Remove(slot);
-                _context.SaveChanges();
-
-                return Ok(new { message = "Time slot deleted successfully." });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error deleting time slot: {e.Message}");
-                return StatusCode(500, new { message = "Failed to delete time slot.", error = e.Message });
-            }
-        }
-*/
-        
+              
     }
 }

@@ -23,11 +23,12 @@ public class LaundryRoomController : ControllerBase
     {
         Console.WriteLine("GetUserLaundryRoom endpoint is being hit successfully...");
 
+         // Check if the user is authenticated
         if (!User.Identity.IsAuthenticated)
         {
             return Unauthorized(new { message = "User is not authenticated." });
         }
-
+        // Retrieve the user ID from the JWT token
         string userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
@@ -38,7 +39,8 @@ public class LaundryRoomController : ControllerBase
         Console.WriteLine($"Authenticated User ID: {userId}");
 
         try
-        {
+        {            // Query the laundry room associated with the user's complex
+
             var laundryRoom = _context.LaundryRooms
                 .Join(_context.LivesIn, lr => lr.ComplexId, li => li.ComplexId,
                     (lr, li) => new { LaundryRoom = lr, LivesIn = li })
@@ -89,7 +91,9 @@ public class LaundryRoomController : ControllerBase
                 return NotFound(new { message = "No timeslots found for this laundry room." });
             }
 
-            // Shape the response to avoid $id and $values
+            // Shape the response to avoid $id and $values. These are added by Entity framwork and a hassle on the frontend...
+            // Also Format the response to avoid issues with serialization
+
             var formattedResponse = timeslots.Select(ts => new
             {
                 timeslotId = ts.timeslotId,

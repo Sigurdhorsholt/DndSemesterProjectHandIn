@@ -140,18 +140,16 @@
     {
         if (SelectedRoom != null && CurrentSettings != null)
         {
-            // Sanitize TimeSlots: Remove duplicates
             CurrentSettings.TimeSlots = CurrentSettings.TimeSlots
                 .GroupBy(ts => new { ts.StartTime, ts.EndTime, ts.ComplexId })
                 .Select(g => g.First())
                 .ToList();
 
-            // Handle null ComplexName
             foreach (var slot in CurrentSettings.TimeSlots)
             {
                 if (string.IsNullOrEmpty(slot.ComplexName))
                 {
-                    slot.ComplexName = "Default Complex Name"; // Replace with actual default if needed
+                    slot.ComplexName = "fallback or defualt Complex Name"; 
                 }
             }
             
