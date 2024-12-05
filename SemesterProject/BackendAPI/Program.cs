@@ -14,12 +14,14 @@ using Microsoft.Data.Sqlite;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+// Add controller support with JSON serialization options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        // Preserves object references to avoid circular references in JSON
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.WriteIndented = true; // Optional: makes the JSON response more readable
+         // Optional: makes the JSON response more readable
+        options.JsonSerializerOptions.WriteIndented = true;
     });
 
 
@@ -27,7 +29,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-
+// Configure CORS to allow all origins, methods, and headers (open policy)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -37,6 +39,8 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader(); // Allows any headers
     });
 });
+
+// Configure JWT authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,7 +59,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
+// Path to SQLite database file
 var filePath = "C:\\Users\\sigur\\OneDrive\\Dokumenter\\GitHub\\DndSemesterProjectHandIn\\SemesterProject\\SqliteDB\\DataBase.sqlite";
 
 if (!File.Exists(filePath))
@@ -73,6 +77,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
  * SETTING UP APP BELOW
  */
 
+// Build the application
 
 var app = builder.Build();
 
@@ -87,10 +92,13 @@ app.UseCors("AllowAll");
 
 
 app.UseHttpsRedirection();
-
+// Enable authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
+// Map controllers to endpoints
 app.MapControllers();
+
+// Middleware to log incoming HTTP requests
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"{context.Request.Method} {context.Request.Path}");
