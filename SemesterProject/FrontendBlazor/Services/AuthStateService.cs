@@ -43,33 +43,22 @@ OnStateChanged?.Invoke(); // Trigger the OnStateChanged event
 
     public async Task<bool> Login(string username, string password)
     {
-      //  Console.WriteLine("AuthStateService.Login() - Hit");
-        var response = await _httpClient.PostAsJsonAsync("/api/auth/login", new { Username = username, Password = password });
-      //  Console.WriteLine("AuthStateService.Login() - response: " + response.ToString());
-        
+        var response = await _httpClient.PostAsJsonAsync("/api/auth/login", new { Username = username, Password = password });        
         if (response.IsSuccessStatusCode)
         {
-
             var responseJson = await response.Content.ReadFromJsonAsync<TokenResponse>();
             var token = responseJson?.Token?.Trim();
-          //  Console.WriteLine("AuthStateService.Login() - token recieved. " + token);
-
             if (string.IsNullOrEmpty(token))
             {
                 Console.WriteLine("AuthStateService.Login() - Token is null or empty.");
                 return false;
             }
-
-           // Console.WriteLine("AuthStateService.Login() - Token received: " + token);
-
             await _localStorageService.SetItemAsync("token", token);
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             DecodeAndSetUserFromToken(token);
             
-            SetStateData(CurrentUser);
             NotifyAuthStateChanged(); // Notify state change
-
-            
+       
             return true;
         }
         return false;
@@ -145,14 +134,7 @@ OnStateChanged?.Invoke(); // Trigger the OnStateChanged event
         return response1.ToString();
     }
     
-    
-    private void SetStateData(UserDto currentUser)
-    {
-        
-        
-        
-    }
-    
+
     
 }
 public class TokenResponse

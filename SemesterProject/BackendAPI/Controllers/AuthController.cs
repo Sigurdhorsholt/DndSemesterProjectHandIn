@@ -59,28 +59,20 @@ public class AuthController : ControllerBase
     {
         try
         {
-
             // Check if user exists in the database
             var user = GetUserWithComplexInfo(model.UserName);
             if (user == null)
             {
                 return Unauthorized(new { message = "User does not exist" });
             }
-
             // Check password
             if (user.Password != model.Password) // Again, you should be using a hashed password comparison.
             {
                 return Unauthorized(new { message = "Incorrect password" });
             }
-
             // Generate JWT Token with additional claims
             var token = GenerateJwtToken(user);
-
-            Console.WriteLine("Login successful for user ID: " + user.Id);
-            Console.WriteLine("Token to be returnedfrom AuthController.Login(): "+ token);
-
             return Ok(new { token });
-            //return Ok(token);
         }
         catch (Exception ex)
         {

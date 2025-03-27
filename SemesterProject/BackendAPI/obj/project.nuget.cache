@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5L97R9FgEYk=",
+  "dgSpecHash": "vjS1i2SrJ3M=",
   "success": true,
   "projectFilePath": "C:\\Users\\sigur\\OneDrive\\Dokumenter\\GitHub\\DndSemesterProjectHandIn\\SemesterProject\\BackendAPI\\BackendAPI.csproj",
   "expectedPackageFiles": [
@@ -53,7 +53,11 @@
     "C:\\Users\\sigur\\.nuget\\packages\\system.buffers\\4.5.0\\system.buffers.4.5.0.nupkg.sha512",
     "C:\\Users\\sigur\\.nuget\\packages\\system.identitymodel.tokens.jwt\\7.1.2\\system.identitymodel.tokens.jwt.7.1.2.nupkg.sha512",
     "C:\\Users\\sigur\\.nuget\\packages\\system.memory\\4.5.3\\system.memory.4.5.3.nupkg.sha512",
-    "C:\\Users\\sigur\\.nuget\\packages\\system.text.encodings.web\\4.5.0\\system.text.encodings.web.4.5.0.nupkg.sha512"
+    "C:\\Users\\sigur\\.nuget\\packages\\system.text.encodings.web\\4.5.0\\system.text.encodings.web.4.5.0.nupkg.sha512",
+    "C:\\Users\\sigur\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.14\\microsoft.netcore.app.ref.8.0.14.nupkg.sha512",
+    "C:\\Users\\sigur\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.14\\microsoft.windowsdesktop.app.ref.8.0.14.nupkg.sha512",
+    "C:\\Users\\sigur\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.14\\microsoft.aspnetcore.app.ref.8.0.14.nupkg.sha512",
+    "C:\\Users\\sigur\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.14\\microsoft.netcore.app.host.win-x64.8.0.14.nupkg.sha512"
   ],
   "logs": []
 }
